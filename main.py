@@ -9,43 +9,41 @@ block_size = int(sys.orig_argv[3])
 if storage_space % block_size == 0: block_num = storage_space // block_size
 else: block_num = (storage_space // block_size) + 1
 free_block_num = block_num
-
 block_arr = np.zeros([block_num, block_size])
 block_arr = block_arr.astype(int)
 free_blocks = [i for i in range(block_num)]
 fat = {}
 
 def main():
-
-    global block_arr, free_blocks, free_block_num, fat
-    cont = input("\nThis is a block allocation/deallocation simulator. you will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. Type 'print' at any time to print the current state, or 'exit' at any time to exit the program. Would you like to continue? (Y/N) ").lower()
+    global free_block_num, fat
+    
+    cont = input("\nThis is a sequential block allocation/deallocation simulator. You will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. A list of commands are as follows:\n\n - print: prints current state of storage and FAT\n - clear: clears storage and FAT\n - compact: compacts files in storage\n - exit: prints state and exits program\n\nWould you like to continue? (Y/N) ").lower()
     while cont not in ["y", "yes"]:
-        if cont in ["n", "no"]: break
-        else: pass
-    print("\n")
+        if cont in ["n", "no"]:
+            print("Program has exited.")
+            sys.exit()
+        else:
+            pass
+    print()
 
     while True:
         file_id = input("Enter file ID (or other command): ")
-        if file_id == "print":
-            print_state()
+        if not file_id.isnumeric():
+            getCommand(file_id)
             continue
-        elif file_id == "exit":
-            print("Program has exited.")
-            break
         file_size = input("Enter file size in bytes (or other command): ")
-        if file_size == "print":
-            print_state()
+        if not file_size.isnumeric():
+            getCommand(file_size)
             continue
-        elif file_size == "exit":
-            print("Program has exited.")
-            break
         file_id = int(file_id)
         file_size = int(file_size)
 
         if file_size > 0:
             if file_size <= storage_space and file_size <= free_block_num * block_size:
                 if not enoughSpace(file_size):
+                    print("\nNot enough contiguous space. Compacting...")
                     compact()
+                    print("Compacting complete.\n")
                 if file_size % block_size != 0:
                     block_num = (file_size // block_size) + 1
                 else:
@@ -80,12 +78,32 @@ def main():
             if file_size == 0:
                 remove(file_id)
             else:
-                print("ERROR: invalid size/cmd argument.")
+                print("ERROR: invalid size argument")
                 continue
 
-    print_state()
+def getCommand(input):
+    if input == "print":
+        printState()
+    elif input == "clear":
+        clear()
+        print("\nStorage has been cleared.\n")
+    elif input == "compact":
+        compact()
+        print("\nStorage has been compacted.\n")
+    elif input == "exit":
+        printState()
+        print("\nProgram has exited.\n")
+        sys.exit()
+    else:
+        print("\nERROR: invalid command\n")
 
-    return
+def clear():
+    global free_blocks, free_block_num, fat
+
+    block_arr.fill(0)
+    free_block_num = block_num
+    free_blocks = [i for i in range(block_num)]
+    fat = {}
 
 def enoughSpace(size):
     free = 0
@@ -109,7 +127,7 @@ def compact():
     block_list = []
     for i in range(len(block_arr)):
         if block_arr[i, 0] != 0:
-            block_list.append(block_arr[i][0])
+            block_list.append(block_arr[i, 0])
     
     block_arr.fill(0)
     free_blocks.clear()
@@ -133,7 +151,7 @@ def compact():
 
 def remove(file_id):
 
-    global block_arr, free_blocks, free_block_num
+    global free_block_num
 
     fat.pop(file_id)
     for block in range(len(block_arr)):
@@ -142,7 +160,7 @@ def remove(file_id):
             free_block_num += 1
             block_arr[block].fill(0)
 
-def print_state():
+def printState():
 
     '''page_table_df = pd.DataFrame.from_dict(fat, orient="index")
     page_table_df.fillna(-100000, inplace=True)
