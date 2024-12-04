@@ -64,14 +64,13 @@ def main():
                 blocks_left = block_num
                 disk_block, file_block = 0, 0
                 while blocks_left > 0:
-                    if file_block <= block_num:
-                        if block_arr[disk_block, 0] == 0:
-                            block_arr[disk_block].fill(file_id)
-                            fat[file_id].update({file_block: disk_block})
-                            free_blocks.remove(disk_block)
-                            free_block_num -= 1
-                            blocks_left -= 1
-                            file_block += 1
+                    if file_block <= block_num and block_arr[disk_block, 0] == 0:
+                        block_arr[disk_block].fill(file_id)
+                        fat[file_id].update({file_block: disk_block})
+                        free_blocks.remove(disk_block)
+                        free_block_num -= 1
+                        blocks_left -= 1
+                        file_block += 1
                     if disk_block < len(block_arr) - 1: # Necessary?
                         disk_block += 1
                     else:
