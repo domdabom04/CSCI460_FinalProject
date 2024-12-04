@@ -24,7 +24,7 @@ def main():
             print("\nProgram has exited.\n")
             sys.exit()
         else:
-            cont = input("ERROR: invalid input. Please enter (Y/N): ")
+            cont = input("ERROR: invalid input. Please enter Y/N: ")
     print()
 
     while True:
