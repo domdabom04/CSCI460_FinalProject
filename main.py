@@ -17,7 +17,7 @@ fat = {}
 def main():
     global free_block_num, fat
     
-    cont = input("\nThis is a sequential block allocation/deallocation simulator. You will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. A list of commands are as follows:\n\n - print: prints current state of storage and FAT\n - clear: clears storage and FAT\n - compact: compacts files in storage\n - exit: prints state and exits program\n\nWould you like to continue? (Y/N) ").lower()
+    cont = input("\nThis is a sequential block allocation/deallocation simulator. You will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. Enter '0' as the file size for an existing file ID to remove it from the disk. A list of additional commands are as follows:\n\n - print: prints current state of the disk and FAT\n - clear: clears disk and FAT\n - compact: compacts files in disk\n - exit: prints state and exits program\n\nWould you like to continue? (Y/N) ").lower()
     while cont not in ["y", "yes"]:
         if cont in ["n", "no"]:
             print("Program has exited.")
@@ -69,9 +69,9 @@ def main():
             else:
                 # JOB TOO LARGE
                 if file_size > storage_space:
-                    print("ERROR: file size exceeds total storage space")
+                    print("ERROR: file size exceeds total disk space")
                 else:
-                    print("ERROR: file size exceeds available storage space")
+                    print("ERROR: file size exceeds available disk space")
                 continue
         else:
             # HANDLE 0
