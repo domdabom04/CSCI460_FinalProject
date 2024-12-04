@@ -12,12 +12,13 @@ free_block_num = block_num
 block_arr = np.zeros([block_num, block_size])
 block_arr = block_arr.astype(int)
 free_blocks = [i for i in range(block_num)]
+file_ids = []
 fat = {}
 
 def main():
     global free_block_num, fat
     
-    cont = input("\nThis is a sequential block allocation/deallocation simulator. You will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. Enter '0' as the file size for an existing file ID to remove it from the disk. A list of additional commands are as follows:\n\n - print: prints current state of the disk and FAT\n - clear: clears disk and FAT\n - compact: compacts files in disk\n - exit: prints state and exits program\n\nWould you like to continue? (Y/N) ").lower()
+    cont = input("\nThis is a sequential block allocation/deallocation simulator. You will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. Enter '0' as the file size for an existing file ID to remove it from the disk. A list of additional commands are as follows:\n\n - print: prints current state of the disk and FAT\n - clear: clears disk and FAT\n - compact: compacts files in disk\n - help: prints a list of available commands\n - exit: prints state and exits program\n\nWould you like to continue? (Y/N) ").lower()
     while cont not in ["y", "yes"]:
         if cont in ["n", "no"]:
             print("Program has exited.")
@@ -40,6 +41,16 @@ def main():
 
         if file_size > 0:
             if file_size <= storage_space and file_size <= free_block_num * block_size:
+
+                if file_id not in file_ids:
+                    file_ids.append(file_id)
+                else:
+                    print("\nERROR: file ID already exists\n")
+                    continue
+                if file_id <= 0:
+                    print("\nERROR: file ID must be ≥ 1\n")
+                    continue
+
                 if not enoughSpace(file_size):
                     print("\nNot enough contiguous space. Compacting...")
                     compact()
@@ -69,16 +80,16 @@ def main():
             else:
                 # JOB TOO LARGE
                 if file_size > storage_space:
-                    print("ERROR: file size exceeds total disk space")
+                    print("\nERROR: file size exceeds total disk space\n")
                 else:
-                    print("ERROR: file size exceeds available disk space")
+                    print("\nERROR: file size exceeds available disk space\n")
                 continue
         else:
             # HANDLE 0
             if file_size == 0:
                 remove(file_id)
             else:
-                print("ERROR: invalid size argument")
+                print("\nERROR: invalid size argument\n")
                 continue
 
 def getCommand(input):
@@ -90,6 +101,8 @@ def getCommand(input):
     elif input == "compact":
         compact()
         print("\nStorage has been compacted.\n")
+    elif input == "help":
+        print("\nAvailable commands:\n\n - print: prints current state of the disk and FAT\n - clear: clears disk and FAT\n - compact: compacts files in disk\n - help: prints a list of available commands\n - exit: prints state and exits program\n")
     elif input == "exit":
         printState()
         print("\nProgram has exited.\n")
@@ -98,11 +111,12 @@ def getCommand(input):
         print("\nERROR: invalid command\n")
 
 def clear():
-    global free_blocks, free_block_num, fat
+    global free_blocks, free_block_num, file_ids, fat
 
     block_arr.fill(0)
     free_block_num = block_num
     free_blocks = [i for i in range(block_num)]
+    file_ids = []
     fat = {}
 
 def enoughSpace(size):
@@ -150,8 +164,13 @@ def compact():
     }
 
 def remove(file_id):
-
     global free_block_num
+
+    if file_id in file_ids:
+        file_ids.remove(file_id)
+    else:
+        print("\nERROR: file ID does not exist\n")
+        return
 
     fat.pop(file_id)
     for block in range(len(block_arr)):
@@ -159,6 +178,7 @@ def remove(file_id):
             free_blocks.append(block)
             free_block_num += 1
             block_arr[block].fill(0)
+    print(f"\nFile {file_id} successfully removed.\n")
 
 def printState():
 
