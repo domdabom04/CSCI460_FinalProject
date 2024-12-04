@@ -21,10 +21,10 @@ def main():
     cont = input("\nThis is a sequential block allocation/deallocation simulator. You will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. Enter '0' as the file size for an existing file ID to remove it from the disk. A list of additional commands are as follows:\n\n - print: prints current state of the disk and FAT\n - clear: clears disk and FAT\n - compact: compacts files in disk\n - help: prints a list of available commands\n - exit: prints state and exits program\n\nWould you like to continue? (Y/N) ").lower()
     while cont not in ["y", "yes"]:
         if cont in ["n", "no"]:
-            print("Program has exited.")
+            print("\nProgram has exited.\n")
             sys.exit()
         else:
-            pass
+            cont = input("ERROR: invalid input. Please enter (Y/N): ")
     print()
 
     while True:
@@ -97,10 +97,10 @@ def getCommand(input):
         printState()
     elif input == "clear":
         clear()
-        print("\nStorage has been cleared.\n")
+        print("\nDisk has been cleared.\n")
     elif input == "compact":
         compact()
-        print("\nStorage has been compacted.\n")
+        print("\nDisk has been compacted.\n")
     elif input == "help":
         print("\nAvailable commands:\n\n - print: prints current state of the disk and FAT\n - clear: clears disk and FAT\n - compact: compacts files in disk\n - help: prints a list of available commands\n - exit: prints state and exits program\n")
     elif input == "exit":
@@ -120,10 +120,13 @@ def clear():
     fat = {}
 
 def enoughSpace(size):
-    free = 0
+    if not free_blocks: return False
+    free = 1
     if size % block_size == 0: block_num = size // block_size
     else: block_num = (size // block_size) + 1
-    for i in range(len(free_blocks)):
+    if free == block_num: return True
+
+    for i in range(len(free_blocks) - 1):
         cur = free_blocks[i]
         for j in range(i + 1, len(free_blocks)):
             if free_blocks[j] == cur + 1:
@@ -158,10 +161,7 @@ def compact():
         else:
             free_blocks.append(i)
 
-    fat = {
-        outer_key: {inner_key: value for inner_key, value in zip(inner_dict.keys(), reversed(inner_dict.values()))}
-        for outer_key, inner_dict in fat.items()
-    }
+    fat = {outer_key: {inner_key: value for inner_key, value in zip(inner_dict.keys(), reversed(inner_dict.values()))} for outer_key, inner_dict in fat.items()}
 
 def remove(file_id):
     global free_block_num
