@@ -18,7 +18,7 @@ fat = {}
 def main():
     global free_block_num, fat
     
-    cont = input("\nThis is a sequential block allocation/deallocation simulator. You will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. Enter '0' as the file size for an existing file ID to remove it from the disk. A list of additional commands is as follows:\n\n - print: prints current state of the disk and FAT\n - clear: clears disk and FAT\n - compact: compacts files in disk\n - help: prints a list of available commands\n - exit: prints state and exits program\n\nWould you like to continue? (Y/N) ").lower()
+    cont = input("\nThis is a sequential block allocation/deallocation simulator. You will be prompted to enter an ID number and size for each file, and the system will allocate and deallocate blocks as needed. Enter '0' as the file size for an existing file ID to remove it from the disk. A list of additional commands are as follows:\n\n - print: prints current state of the disk and FAT\n - clear: clears disk and FAT\n - compact: compacts files in disk\n - help: prints a list of available commands\n - exit: prints state and exits program\n\nWould you like to continue? (Y/N) ").lower()
     while cont not in ["y", "yes"]:
         if cont in ["n", "no"]:
             print("\nProgram has exited.\n")
@@ -62,18 +62,18 @@ def main():
 
                 fat[file_id] = {}
                 blocks_left = block_num
-                storage_block, file_block = 0, 0
+                disk_block, file_block = 0, 0
                 while blocks_left > 0:
                     if file_block <= block_num:
-                        if block_arr[storage_block, 0] == 0:
-                            block_arr[storage_block].fill(file_id)
-                            fat[file_id].update({file_block: storage_block})
-                            free_blocks.remove(storage_block)
+                        if block_arr[disk_block, 0] == 0:
+                            block_arr[disk_block].fill(file_id)
+                            fat[file_id].update({file_block: disk_block})
+                            free_blocks.remove(disk_block)
                             free_block_num -= 1
                             blocks_left -= 1
                             file_block += 1
-                    if storage_block < len(block_arr) - 1: # Necessary?
-                        storage_block += 1
+                    if disk_block < len(block_arr) - 1: # Necessary?
+                        disk_block += 1
                     else:
                         #print("ERROR: block index exceeds total number of blocks.")
                         break
@@ -194,10 +194,10 @@ def printState():
     frame_df.index.name = "Block Number"
     frame_df = frame_df.iloc[0:]
 
-    #print("\n\nPAGING SYSTEM SIMULATOR:\n\nThis system emulates a simple file system. Printed below are the file_block tables for each process (job) in the system, as well as the internal fragmentation for each job. Free frames are denoted as 'FREE'. Note that a negative storage_block value indicates a storage_block in secondary storage. Below that is a table showing each storage_block in main memory and the ID of the job occupying that storage_block. Free frames are also denoted as 'FREE'.")
+    #print("\n\nPAGING SYSTEM SIMULATOR:\n\nThis system emulates a simple file system. Printed below are the file_block tables for each process (job) in the system, as well as the internal fragmentation for each job. Free frames are denoted as 'FREE'. Note that a negative disk_block value indicates a disk_block in secondary storage. Below that is a table showing each disk_block in main memory and the ID of the job occupying that disk_block. Free frames are also denoted as 'FREE'.")
 
     print("\nFile Allocation Tables:\n")
-    print(page_table_df.replace(str("| storage_block-100000"), "|     FREE").to_string())
+    print(page_table_df.replace(str("| disk_block-100000"), "|     FREE").to_string())
 
     print("\n\nStorage:\n")
     print(frame_df.replace(0, "FREE").to_string())
